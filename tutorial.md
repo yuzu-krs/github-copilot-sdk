@@ -29,6 +29,7 @@
 GitHub Copilot SDK は、**Copilot CLI のエージェントランタイム**をプログラムから呼び出せる SDK です。Copilot が内部で使っているのと同じエンジンを、自分のアプリケーションに組み込めます。
 
 **できること:**
+
 - LLM へのプロンプト送信とレスポンス受信
 - ストリーミング出力
 - カスタムツール（Function Calling）の定義
@@ -38,13 +39,13 @@ GitHub Copilot SDK は、**Copilot CLI のエージェントランタイム**を
 
 **対応言語:**
 
-| 言語 | パッケージ名 | インストール |
-|------|-------------|-------------|
-| Node.js / TypeScript | `@github/copilot-sdk` | `npm install @github/copilot-sdk` |
-| Python | `github-copilot-sdk` | `pip install github-copilot-sdk` |
-| Go | `github.com/github/copilot-sdk/go` | `go get github.com/github/copilot-sdk/go` |
-| .NET | `GitHub.Copilot.SDK` | `dotnet add package GitHub.Copilot.SDK` |
-| Java | `com.github:copilot-sdk-java` | Maven / Gradle |
+| 言語                 | パッケージ名                       | インストール                              |
+| -------------------- | ---------------------------------- | ----------------------------------------- |
+| Node.js / TypeScript | `@github/copilot-sdk`              | `npm install @github/copilot-sdk`         |
+| Python               | `github-copilot-sdk`               | `pip install github-copilot-sdk`          |
+| Go                   | `github.com/github/copilot-sdk/go` | `go get github.com/github/copilot-sdk/go` |
+| .NET                 | `GitHub.Copilot.SDK`               | `dotnet add package GitHub.Copilot.SDK`   |
+| Java                 | `com.github:copilot-sdk-java`      | Maven / Gradle                            |
 
 **アーキテクチャ:**
 
@@ -121,7 +122,7 @@ ls node_modules/@github/copilot-sdk
 `step1-hello.ts` を作成:
 
 ```typescript
-import { CopilotClient } from "@github/copilot-sdk";
+import { CopilotClient, approveAll } from "@github/copilot-sdk";
 
 // クライアントを作成（CLI プロセスを自動起動）
 const client = new CopilotClient();
@@ -129,6 +130,7 @@ const client = new CopilotClient();
 // セッションを作成
 const session = await client.createSession({
   model: "gpt-4.1",
+  onPermissionRequest: approveAll, // 必須：ツール実行の許可ハンドラ
 });
 
 // メッセージを送信して完了を待つ
@@ -199,7 +201,8 @@ session.on("session.idle", () => {
 
 // メッセージ送信
 await session.sendAndWait({
-  prompt: "JavaScriptの非同期処理について、初心者にわかりやすく説明してください",
+  prompt:
+    "JavaScriptの非同期処理について、初心者にわかりやすく説明してください",
 });
 
 await client.stop();
@@ -272,7 +275,7 @@ const client = new CopilotClient();
 const session = await client.createSession({
   model: "gpt-4.1",
   streaming: true,
-  tools: [getWeather],             // ツールを登録
+  tools: [getWeather], // ツールを登録
   onPermissionRequest: approveAll, // 全ツール実行を自動承認
 });
 
@@ -500,7 +503,8 @@ const session = await client.createSession({
     {
       name: "code-reviewer",
       displayName: "コードレビュアー",
-      description: "コードレビューの専門家。セキュリティ、パフォーマンス、可読性を重視",
+      description:
+        "コードレビューの専門家。セキュリティ、パフォーマンス、可読性を重視",
       prompt: `あなたは経験豊富なシニアエンジニアのコードレビュアーです。
 以下の観点でレビューしてください：
 1. セキュリティ上の問題
@@ -612,7 +616,8 @@ session.on("session.idle", () => console.log());
 
 // GitHub のリポジトリ情報を聞いてみる
 await session.sendAndWait({
-  prompt: "github/copilot-sdk リポジトリの最新のリリースバージョンと、直近のIssueを3件教えてください",
+  prompt:
+    "github/copilot-sdk リポジトリの最新のリリースバージョンと、直近のIssueを3件教えてください",
 });
 
 await client.stop();
@@ -649,7 +654,7 @@ const client = new CopilotClient();
 
 // --- パターン A: OpenAI API を使う場合 ---
 const sessionOpenAI = await client.createSession({
-  model: "gpt-4o",  // カスタムプロバイダーでは model 指定が必須
+  model: "gpt-4o", // カスタムプロバイダーでは model 指定が必須
   onPermissionRequest: approveAll,
   provider: {
     type: "openai",
@@ -708,15 +713,15 @@ npx tsx step7-byok.ts
 
 ### このチュートリアルで学んだこと
 
-| STEP | 内容 | キーワード |
-|------|------|-----------|
-| 1 | 最初のメッセージ送信 | `CopilotClient`, `createSession`, `sendAndWait` |
-| 2 | ストリーミング | `streaming: true`, `message_delta` |
-| 3 | カスタムツール | `defineTool`, `handler`, `approveAll` |
-| 4 | 対話型アシスタント | `readline`, `systemMessage`, 会話の文脈保持 |
-| 5 | カスタムエージェント | `customAgents`, `agent`, AI ペルソナ |
-| 6 | MCP サーバー連携 | `mcpServers`, Model Context Protocol |
-| 7 | BYOK | `provider`, OpenAI / Azure / Ollama |
+| STEP | 内容                 | キーワード                                      |
+| ---- | -------------------- | ----------------------------------------------- |
+| 1    | 最初のメッセージ送信 | `CopilotClient`, `createSession`, `sendAndWait` |
+| 2    | ストリーミング       | `streaming: true`, `message_delta`              |
+| 3    | カスタムツール       | `defineTool`, `handler`, `approveAll`           |
+| 4    | 対話型アシスタント   | `readline`, `systemMessage`, 会話の文脈保持     |
+| 5    | カスタムエージェント | `customAgents`, `agent`, AI ペルソナ            |
+| 6    | MCP サーバー連携     | `mcpServers`, Model Context Protocol            |
+| 7    | BYOK                 | `provider`, OpenAI / Azure / Ollama             |
 
 ### さらに探求するトピック
 
@@ -730,17 +735,17 @@ npx tsx step7-byok.ts
 
 ### 参考リンク
 
-| リソース | URL |
-|---------|-----|
-| GitHub Copilot SDK リポジトリ | https://github.com/github/copilot-sdk |
-| Getting Started ガイド | https://github.com/github/copilot-sdk/blob/main/docs/getting-started.md |
-| Node.js SDK リファレンス | https://github.com/github/copilot-sdk/blob/main/nodejs/README.md |
-| Python SDK リファレンス | https://github.com/github/copilot-sdk/blob/main/python/README.md |
-| 認証ガイド | https://github.com/github/copilot-sdk/blob/main/docs/auth/index.md |
-| BYOK ドキュメント | https://github.com/github/copilot-sdk/blob/main/docs/auth/byok.md |
-| MCP サーバー連携 | https://github.com/github/copilot-sdk/blob/main/docs/features/mcp.md |
-| カスタムエージェント | https://github.com/github/copilot-sdk/blob/main/docs/features/custom-agents.md |
-| Cookbook（レシピ集） | https://github.com/github/awesome-copilot/blob/main/cookbook/copilot-sdk |
+| リソース                      | URL                                                                            |
+| ----------------------------- | ------------------------------------------------------------------------------ |
+| GitHub Copilot SDK リポジトリ | https://github.com/github/copilot-sdk                                          |
+| Getting Started ガイド        | https://github.com/github/copilot-sdk/blob/main/docs/getting-started.md        |
+| Node.js SDK リファレンス      | https://github.com/github/copilot-sdk/blob/main/nodejs/README.md               |
+| Python SDK リファレンス       | https://github.com/github/copilot-sdk/blob/main/python/README.md               |
+| 認証ガイド                    | https://github.com/github/copilot-sdk/blob/main/docs/auth/index.md             |
+| BYOK ドキュメント             | https://github.com/github/copilot-sdk/blob/main/docs/auth/byok.md              |
+| MCP サーバー連携              | https://github.com/github/copilot-sdk/blob/main/docs/features/mcp.md           |
+| カスタムエージェント          | https://github.com/github/copilot-sdk/blob/main/docs/features/custom-agents.md |
+| Cookbook（レシピ集）          | https://github.com/github/awesome-copilot/blob/main/cookbook/copilot-sdk       |
 
 ---
 
@@ -748,13 +753,13 @@ npx tsx step7-byok.ts
 
 ### よくあるエラーと対処法
 
-| エラー | 原因 | 対処 |
-|--------|------|------|
-| `COPILOT_CLI_PATH not found` | CLI が見つからない | SDK にバンドルされているはずだが、`npm install` をやり直す |
-| `Authentication failed` | 認証が通っていない | `copilot auth login` で再認証 |
-| `Model not available` | 指定モデルが利用不可 | `listModels()` で利用可能モデルを確認 |
-| `Permission denied` | ツール実行が拒否された | `onPermissionRequest: approveAll` を設定 |
-| `Timeout` | レスポンスが時間内に返らない | `sendAndWait` の `timeout` パラメータを増やす |
+| エラー                       | 原因                         | 対処                                                       |
+| ---------------------------- | ---------------------------- | ---------------------------------------------------------- |
+| `COPILOT_CLI_PATH not found` | CLI が見つからない           | SDK にバンドルされているはずだが、`npm install` をやり直す |
+| `Authentication failed`      | 認証が通っていない           | `copilot auth login` で再認証                              |
+| `Model not available`        | 指定モデルが利用不可         | `listModels()` で利用可能モデルを確認                      |
+| `Permission denied`          | ツール実行が拒否された       | `onPermissionRequest: approveAll` を設定                   |
+| `Timeout`                    | レスポンスが時間内に返らない | `sendAndWait` の `timeout` パラメータを増やす              |
 
 ### 環境変数
 
@@ -777,16 +782,16 @@ export AZURE_OPENAI_KEY="..."
 
 ### 推奨構成（約90分）
 
-| セクション | 時間目安 | 内容 |
-|-----------|---------|------|
-| オープニング | 3分 | SDKの紹介、今日やること |
-| 環境構築 | 7分 | 前提条件、インストール |
-| STEP 1-2 | 15分 | 基本操作、ストリーミング |
-| STEP 3 | 15分 | カスタムツール（ここが一番重要） |
-| STEP 4 | 15分 | 対話型アシスタント |
-| STEP 5 | 10分 | カスタムエージェント |
-| STEP 6-7 | 15分 | MCP、BYOK |
-| まとめ | 10分 | 振り返り、次のステップ |
+| セクション   | 時間目安 | 内容                             |
+| ------------ | -------- | -------------------------------- |
+| オープニング | 3分      | SDKの紹介、今日やること          |
+| 環境構築     | 7分      | 前提条件、インストール           |
+| STEP 1-2     | 15分     | 基本操作、ストリーミング         |
+| STEP 3       | 15分     | カスタムツール（ここが一番重要） |
+| STEP 4       | 15分     | 対話型アシスタント               |
+| STEP 5       | 10分     | カスタムエージェント             |
+| STEP 6-7     | 15分     | MCP、BYOK                        |
+| まとめ       | 10分     | 振り返り、次のステップ           |
 
 ### 見せ方のコツ
 
